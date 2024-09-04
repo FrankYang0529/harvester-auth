@@ -23,7 +23,7 @@ fi
 rm -rf ./harvester-auth
 cp ../bin/harvester-auth .
 
-docker build --build-arg --build-arg ARCH=${ARCH} -f ${DOCKERFILE} -t ${IMAGE} .
+docker build --build-arg ARCH=${ARCH} -f ${DOCKERFILE} -t ${IMAGE} .
 echo Built ${IMAGE}
 
 IMAGE_PUSH=${REPO}/harvester-auth:${IMAGE_PUSH_TAG}

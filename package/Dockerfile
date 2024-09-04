@@ -18,7 +18,7 @@ ENV TINI_URL_amd64=https://github.com/krallin/tini/releases/download/${TINI_VERS
 
 RUN curl -sLf ${!TINI_URL} > /usr/bin/tini && chmod +x /usr/bin/tini
 
-COPY entrypoint.sh harvester /usr/bin/
+COPY entrypoint.sh harvester-auth /usr/bin/
 RUN chmod +x /usr/bin/entrypoint.sh
 
 VOLUME /var/lib/harvester/auth

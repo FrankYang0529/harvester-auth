@@ -10,6 +10,7 @@ import (
 	"github.com/rancher/rancher/pkg/auth"
 	steveserver "github.com/rancher/steve/pkg/server"
 	"github.com/rancher/wrangler/pkg/signals"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 
 	"github.com/harvester/auth/pkg/config"
@@ -62,27 +63,34 @@ func main() {
 }
 
 func run(options config.Options) error {
+	logger := logrus.New()
 	ctx := signals.SetupSignalContext()
+
 	_, clientConfig, err := k8s.GetConfig(ctx, "auto", options.KubeConfig)
 	if err != nil {
+		logger.WithError(err).Error("Failed to get k8s config")
 		return err
 	}
 
 	restConfig, err := clientConfig.ClientConfig()
 	if err != nil {
+		logger.WithError(err).Error("Failed to get client config")
 		return err
 	}
 
 	authServer, err := auth.NewServer(ctx, restConfig)
 	if err != nil {
+		logger.WithError(err).Error("Failed to start auth server")
 		return err
 	}
 	if err = authServer.Start(ctx, false); err != nil {
+		logger.WithError(err).Error("Failed to run authServer.Start")
 		return err
 	}
 
 	steve, err := steveserver.New(ctx, restConfig, nil)
 	if err != nil {
+		logger.WithError(err).Error("Failed to new steve server")
 		return err
 	}
 
@@ -97,7 +105,9 @@ func run(options config.Options) error {
 	}
 
 	if err := server.ListenAndServe(ctx, options.HTTPSListenPort, options.HTTPListenPort, authServer.Authenticator(steve), listenOpts); err != nil {
+		logger.WithError(err).Error("Failed to list and serve")
 		return err
 	}
+	logger.Info("Auth server over")
 	return nil
 }
