@@ -899,6 +899,10 @@ github.com/rancher/rancher/pkg/clusterrouter
 github.com/rancher/rancher/pkg/clusterrouter/proxy
 github.com/rancher/rancher/pkg/controllers
 github.com/rancher/rancher/pkg/controllers/capr/dynamicschema
+github.com/rancher/rancher/pkg/controllers/dashboard/helm
+github.com/rancher/rancher/pkg/controllers/dashboardapi
+github.com/rancher/rancher/pkg/controllers/dashboardapi/feature
+github.com/rancher/rancher/pkg/controllers/dashboardapi/settings
 github.com/rancher/rancher/pkg/controllers/management/auth
 github.com/rancher/rancher/pkg/controllers/management/auth/globalroles
 github.com/rancher/rancher/pkg/controllers/management/authprovisioningv2
