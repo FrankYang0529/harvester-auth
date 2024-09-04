@@ -108,6 +108,7 @@ func run(options config.Options) error {
 		logger.WithError(err).Error("Failed to list and serve")
 		return err
 	}
+	<-ctx.Done()
 	logger.Info("Auth server over")
-	return nil
+	return ctx.Err()
 }
