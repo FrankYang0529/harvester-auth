@@ -8,6 +8,8 @@ import (
 	"github.com/rancher/dynamiclistener/server"
 	"github.com/rancher/norman/pkg/kwrapper/k8s"
 	"github.com/rancher/rancher/pkg/auth"
+	"github.com/rancher/rancher/pkg/controllers/dashboardapi"
+	"github.com/rancher/rancher/pkg/wrangler"
 	steveserver "github.com/rancher/steve/pkg/server"
 	"github.com/rancher/wrangler/pkg/signals"
 	"github.com/sirupsen/logrus"
@@ -88,11 +90,22 @@ func run(options config.Options) error {
 		return err
 	}
 
+	wranglerContext, err := wrangler.NewContext(ctx, clientConfig, restConfig)
+	if err != nil {
+		return err
+	}
+
+	if err := dashboardapi.Register(ctx, wranglerContext); err != nil {
+		return err
+	}
+	wranglerContext.OnLeader(authServer.OnLeader)
+
 	steve, err := steveserver.New(ctx, restConfig, nil)
 	if err != nil {
 		logger.WithError(err).Error("Failed to new steve server")
 		return err
 	}
+	go steve.StartAggregation(ctx)
 
 	listenOpts := &server.ListenOpts{
 		TLSListenerConfig: dynamiclistener.Config{
