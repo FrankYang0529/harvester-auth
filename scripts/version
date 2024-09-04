@@ -1,0 +1,52 @@
+#!/bin/bash
+
+TOP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
+PACKAGE_DIR="${TOP_DIR}/package"
+
+unset DIRTY
+if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+    DIRTY="-dirty"
+fi
+
+COMMIT=$(git rev-parse --short=8 HEAD)
+COMMIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+COMMIT_BRANCH_FORMATTED=$(echo "${COMMIT_BRANCH}" | sed -E 's/[^a-zA-Z0-9.]+/-/g')
+GIT_TAG=$(git tag -l --contains HEAD | head -n 1)
+
+if [[ -z "$DIRTY" && -n "$GIT_TAG" ]]; then
+    VERSION=$GIT_TAG
+else
+    VERSION="${COMMIT}${DIRTY}"
+fi
+
+# Chart tag.
+if [[ -z "$DIRTY" && -n "$GIT_TAG" ]]; then
+    IMAGE_PUSH_TAG="${GIT_TAG}"
+    APP_VERSION="${GIT_TAG}"
+    CHART_VERSION="${GIT_TAG}"
+else
+    IMAGE_PUSH_TAG="${COMMIT_BRANCH_FORMATTED}-head"
+    APP_VERSION="${COMMIT_BRANCH}-${COMMIT}${DIRTY}"
+    CHART_VERSION="v0.0.0-${COMMIT_BRANCH_FORMATTED}-${COMMIT}${DIRTY}"
+fi
+
+if [ -z "$ARCH" ]; then
+    ARCH=$(go env GOHOSTARCH)
+fi
+
+SUFFIX="-${ARCH}"
+
+TAG=${TAG:-${VERSION}${SUFFIX}}
+REPO=${REPO:-rancher}
+
+if echo $TAG | grep -q dirty; then
+    TAG=dev
+fi
+
+echo "ARCH: $ARCH"
+echo "VERSION: $VERSION"
+echo "APP_VERSION: $APP_VERSION"
+echo "SUFFIX: $SUFFIX"
+echo "REPO: $REPO"
+echo "TAG: $TAG"
+echo "IMAGE_PUSH_TAG: $IMAGE_PUSH_TAG"

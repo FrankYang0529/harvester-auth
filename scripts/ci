@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+
+cd $(dirname $0)
+
+# ./validate
+# ./validate-ci
+./build
+# ./test
+# ./package-webhook
+# ./package-upgrade
+# ./test-integration
+./package

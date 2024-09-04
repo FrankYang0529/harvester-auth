@@ -1,0 +1,31 @@
+#!/bin/bash
+set -e
+
+TOP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
+SCRIPTS_DIR="${TOP_DIR}/scripts"
+PACKAGE_DIR="${TOP_DIR}/package"
+
+source $SCRIPTS_DIR/version
+
+cd $TOP_DIR
+
+mkdir -p dist/artifacts
+cp bin/harvester-auth dist/artifacts/harvester-auth
+
+cd $PACKAGE_DIR
+
+IMAGE=${REPO}/harvester-auth:${TAG}
+DOCKERFILE=Dockerfile
+if [ -e ${DOCKERFILE}.${ARCH} ]; then
+    DOCKERFILE=${DOCKERFILE}.${ARCH}
+fi
+
+rm -rf ./harvester-auth
+cp ../bin/harvester-auth .
+
+docker build --build-arg --build-arg ARCH=${ARCH} -f ${DOCKERFILE} -t ${IMAGE} .
+echo Built ${IMAGE}
+
+IMAGE_PUSH=${REPO}/harvester-auth:${IMAGE_PUSH_TAG}
+docker tag "${IMAGE}" "${IMAGE_PUSH}"
+echo Tagged "${IMAGE_PUSH}"
